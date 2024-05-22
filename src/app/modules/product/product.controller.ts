@@ -28,7 +28,22 @@ const getAllProduct = async (req: Request, res: Response) => {
     console.log(err);
   }
 };
+
+const getSingleProduct = async (req: Request, res: Response) => {
+  try {
+    const { productId } = req.params;
+    const result = await ProductServices.getSingleProduct(productId);
+    res.status(200).json({
+      succuss: true,
+      message: 'Product fetched successfully!',
+      data: result,
+    });
+  } catch (err) {
+    console.log(err);
+  }
+};
 export const ProductController = {
   createProduct,
   getAllProduct,
+  getSingleProduct,
 };
