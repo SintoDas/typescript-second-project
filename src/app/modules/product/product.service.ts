@@ -50,10 +50,32 @@ const deleteSingleProduct = async (id: string) => {
 };
 // search document
 
+const updateInventory = async (productId: string, quantity: number) => {
+  try {
+    // Find the product
+    const product = await ProductModel.findById(productId);
+    if (!product) {
+      throw new Error('Product not found!');
+    }
+
+    // Update inventory
+    product.inventory.quantity -= quantity;
+    product.inventory.inStock = product.inventory.quantity > 0;
+
+    // Save the updated product
+    await product.save();
+
+    return product.inventory; // Return updated inventory
+  } catch (err) {
+    throw err;
+  }
+};
+
 export const ProductServices = {
   productCreateIntoDB,
   getallProduct,
   getSingleProduct,
   updateSingleProduct,
   deleteSingleProduct,
+  updateInventory,
 };
