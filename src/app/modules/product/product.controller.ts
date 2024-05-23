@@ -1,12 +1,36 @@
 import { Request, Response } from 'express';
 import { ProductServices } from './product.service';
-import { ProductZodSchema } from './product.zod.validation';
-import { Product } from './product.interface';
+import { ProductJoiSchema } from './product.joi.validation';
 
+//   try {
+//     const { product: productData } = req.body;
+
+//     const result = await ProductServices.productCreateIntoDB(productData);
+//     res.status(200).json({
+//       success: true,
+//       message: 'Product created successfully!',
+//       data: result,
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     res.status(400).json({
+//       success: false,
+//       message: 'Failed to create product!',
+//       error: err, // Sending only error message for security
+//     });
+//   }
+// };
 const createProduct = async (req: Request, res: Response) => {
   try {
+    // Validate request body
     const { product: productData } = req.body;
-
+    const { error } = ProductJoiSchema.validate(productData);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details,
+      });
+    }
     const result = await ProductServices.productCreateIntoDB(productData);
     res.status(200).json({
       success: true,
@@ -14,15 +38,13 @@ const createProduct = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
-    console.error(err);
-    res.status(400).json({
+    console.log(err);
+    res.status(500).json({
       success: false,
-      message: 'Failed to create product!',
-      error: err, // Sending only error message for security
+      message: 'Internal server error',
     });
   }
 };
-
 const getAllProduct = async (req: Request, res: Response) => {
   try {
     const searchTerm = req.query.searchTerm as string;
@@ -70,10 +92,48 @@ const getSingleProduct = async (req: Request, res: Response) => {
   }
 };
 
+// const updateSingleProduct = async (req: Request, res: Response) => {
+//   try {
+//     const { productId } = req.params;
+//     const { product: updateData } = req.body;
+
+//     const result = await ProductServices.updateSingleProduct(
+//       productId,
+//       updateData,
+//     );
+//     if (result.modifiedCount > 0) {
+//       res.status(200).json({
+//         success: true,
+//         message: 'Product updated successfully!',
+//         data: result,
+//       });
+//     } else {
+//       res.status(404).json({
+//         success: false,
+//         message: 'Product not found or no changes made!',
+//       });
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     res.status(400).json({
+//       success: false,
+//       message: 'Failed to update product!',
+//       error: err,
+//     });
+//   }
+// };
 const updateSingleProduct = async (req: Request, res: Response) => {
   try {
     const { productId } = req.params;
     const { product: updateData } = req.body;
+    // Validate request body
+    const { error } = ProductJoiSchema.validate(updateData);
+    if (error) {
+      return res.status(400).json({
+        success: false,
+        message: error.details,
+      });
+    }
 
     const result = await ProductServices.updateSingleProduct(
       productId,
@@ -109,7 +169,7 @@ const deleteSingleProduct = async (req: Request, res: Response) => {
       res.status(200).json({
         success: true,
         message: 'Product deleted successfully!',
-        data: result,
+        data: null,
       });
     } else {
       res.status(404).json({
